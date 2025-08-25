@@ -8,6 +8,7 @@
 #include "entities/laser.h"
 #include "entities/pickup.h"
 #include "entities/plasma.h"
+#include "entities/portal.h"
 #include "entities/projectile.h"
 #include "entity.h"
 #include <engine/shared/config.h>
@@ -661,6 +662,8 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CPickup(*((CPickup *)pEnt));
 			else if(Type == ENTTYPE_PLASMA)
 				pCopy = new CPlasma(*((CPlasma *)pEnt));
+			else if(Type == ENTTYPE_PORTAL)
+				pCopy = new CPortal(*((CPortal *)pEnt));
 			if(pCopy)
 			{
 				pCopy->m_pParent = pEnt;

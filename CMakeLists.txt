@@ -1450,6 +1450,7 @@ set(EXPECTED_DATA
   gui_icons.png
   gui_logo.png
   hud.png
+  portal.png
   languages/arabic.txt
   languages/azerbaijani.txt
   languages/belarusian.txt
@@ -2434,6 +2435,8 @@ if(CLIENT)
     prediction/entities/pickup.h
     prediction/entities/plasma.cpp
     prediction/entities/plasma.h
+    prediction/entities/portal.cpp
+    prediction/entities/portal.h
     prediction/entities/projectile.cpp
     prediction/entities/projectile.h
     prediction/entity.cpp
@@ -2751,6 +2754,8 @@ if(SERVER)
     entities/pickup.h
     entities/plasma.cpp
     entities/plasma.h
+    entities/portal.cpp
+    entities/portal.h
     entities/projectile.cpp
     entities/projectile.h
     entity.cpp

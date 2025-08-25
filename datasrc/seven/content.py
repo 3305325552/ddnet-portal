@@ -149,6 +149,14 @@ class Weapon_Ninja(Struct):
 		self.movetime = Int(200)
 		self.velocity = Int(50)
 
+class Weapon_PortalGun(Struct):
+	def __init__(self):
+		Struct.__init__(self, "CDataWeaponspecPortalGun")
+		self.base = Pointer(WeaponSpec, WeaponSpec())
+		self.curvature = Float(1.25)
+		self.speed = Float(2200)
+		self.lifetime = Float(0.25)
+
 class Weapons(Struct):
 	def __init__(self):
 		Struct.__init__(self, "CDataWeaponspecs")
@@ -158,6 +166,7 @@ class Weapons(Struct):
 		self.grenade = Weapon_Grenade()
 		self.laser = Weapon_Laser()
 		self.ninja = Weapon_Ninja()
+		self.portalgun = Weapon_PortalGun()
 		self.id = Array(WeaponSpec())
 
 class Explosion(Struct):
@@ -252,6 +261,7 @@ image_levelicons = Image("levelicons", "ui/icons/level.png", 1)
 image_sidebaricons = Image("sidebaricons", "ui/icons/sidebar.png", 1)
 image_chatwhisper = Image("chatwhisper", "ui/icons/chat_whisper.png", 1)
 image_timerclock = Image("timerclock", "ui/icons/timer_clock.png", 1)
+image_portal = Image("portal", "portal.png", 1)
 
 container.images.Add(image_null)
 container.images.Add(image_game)
@@ -280,6 +290,8 @@ container.images.Add(image_chatwhisper)
 container.images.Add(Image("raceflag", "race_flag.png"))
 container.images.Add(image_timerclock)
 
+container.images.Add(image_portal)
+
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))
 container.pickups.Add(Pickup("grenade"))
@@ -288,6 +300,8 @@ container.pickups.Add(Pickup("laser"))
 container.pickups.Add(Pickup("ninja", 90, 90))
 container.pickups.Add(Pickup("gun"))
 container.pickups.Add(Pickup("hammer"))
+
+container.pickups.Add(Pickup("armor_portal_gun"))
 
 set_particles = SpriteSet("particles", image_particles, 8, 8)
 set_game = SpriteSet("game", image_game, 32, 16)
@@ -315,6 +329,8 @@ set_levelicons = SpriteSet("levelicons", image_levelicons, 4, 4)
 set_sidebaricons = SpriteSet("sidebaricons", image_sidebaricons, 4, 2)
 set_timerclock = SpriteSet("timerclock", image_timerclock, 1, 2)
 
+set_portal = SpriteSet("portal", image_portal, 32, 16)
+
 container.spritesets.Add(set_particles)
 container.spritesets.Add(set_game)
 container.spritesets.Add(set_tee_body)
@@ -341,6 +357,7 @@ container.spritesets.Add(set_sidebaricons)
 container.spritesets.Add(set_timerclock)
 container.spritesets.Add(set_browsericon)
 
+container.spritesets.Add(set_portal)
 
 container.sprites.Add(Sprite("part_slice", set_particles, 0,0,1,1))
 container.sprites.Add(Sprite("part_ball", set_particles, 1,0,1,1))
@@ -426,6 +443,12 @@ container.sprites.Add(Sprite("ninja_bar_full_left", set_game, 21,4,1,2))
 container.sprites.Add(Sprite("ninja_bar_full", set_game, 22,4,1,2))
 container.sprites.Add(Sprite("ninja_bar_empty", set_game, 23,4,1,2))
 container.sprites.Add(Sprite("ninja_bar_empty_right", set_game, 24,4,1,2))
+
+container.sprites.Add(Sprite("weapon_portal_gun_body", set_portal, 0,0,8,3))
+container.sprites.Add(Sprite("weapon_portal_gun_cursor", set_game, 0,12,2,2))
+container.sprites.Add(Sprite("weapon_portal_gun_proj", set_game, 0,0,0,0))
+container.sprites.Add(Sprite("pickup_portal_gun", set_portal, 0,8,2,2))
+container.sprites.Add(Sprite("pickup_armor_portal_gun", set_portal, 0,0,8,3))
 
 container.sprites.Add(Sprite("tee_body_outline", set_tee_body, 0,0,1,1))
 container.sprites.Add(Sprite("tee_body", set_tee_body, 1,0,1,1))
@@ -679,4 +702,13 @@ weapon.offsety.Set(0)
 weapon.muzzleoffsetx.Set(40)
 weapon.muzzleoffsety.Set(-4)
 container.weapons.ninja.base.Set(weapon)
+container.weapons.id.Add(weapon)
+
+weapon = WeaponSpec(container, "portal_gun")
+weapon.firedelay.Set(500)
+weapon.damage.Set(0)
+weapon.visual_size.Set(96)
+container.weapons.portalgun.base.Set(weapon)
+weapon.offsetx.Set(0)
+weapon.offsety.Set(0)
 container.weapons.id.Add(weapon)

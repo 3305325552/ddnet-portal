@@ -56,7 +56,7 @@ void CCharacter::HandleJetpack()
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
 	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
@@ -261,7 +261,7 @@ void CCharacter::FireWeapon()
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
 	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
@@ -451,6 +451,24 @@ void CCharacter::FireWeapon()
 		m_Core.m_Ninja.m_ActivationDir = Direction;
 		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
+	}
+	break;
+
+	case WEAPON_PORTAL_GUN:
+	{
+		int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(GetOverriddenTuneZone())->m_PortalGunLifetime);
+
+		new CProjectile(
+			GameWorld(),
+			WEAPON_PORTAL_GUN, //Type
+			GetCid(), //Owner
+			ProjStartPos, //Pos
+			Direction, //Dir
+			Lifetime, //Span
+			false, //Freeze
+			false, //Explosive
+			SOUND_LASER_FIRE
+		);
 	}
 	break;
 	}
@@ -1251,6 +1269,8 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
+
+	m_LastPortalType = -1;
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero

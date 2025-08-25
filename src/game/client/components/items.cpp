@@ -18,6 +18,7 @@
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/entities/projectile.h>
+#include <game/client/prediction/entities/portal.h>
 
 #include <game/client/components/effects.h>
 
@@ -45,6 +46,11 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	{
 		Curvature = pTuning->m_GunCurvature;
 		Speed = pTuning->m_GunSpeed;
+	}
+	else if(CurWeapon == WEAPON_PORTAL_GUN)
+	{
+		Curvature = pTuning->m_PortalGunCurvature;
+		Speed = pTuning->m_PortalGunSpeed;
 	}
 
 	bool LocalPlayerInGame = false;
@@ -132,7 +138,33 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 			Graphics()->QuadsSetRotation(0);
 	}
 
-	if(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
+	if(CurWeapon == WEAPON_PORTAL_GUN && GameClient()->m_PortalsSkin.m_SpriteWeaponPortalGun.IsValid())
+	{
+		constexpr int NumLayers = 9;
+		float GlowIntensity = 200.f;
+
+		const float Alphas[NumLayers] = {
+			0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.08f, 0.10f,
+			0.15f, 0.25f
+			};
+		const float Widths[NumLayers] = {
+			24.0f, 22.0f, 20.0f, 18.0f, 16.0f, 14.0f, 12.0f,
+			10.0f, 8.0f
+			};
+
+		for(int i = 0; i < NumLayers; ++i)
+		{
+			float AlphaCircle = Alphas[i] * (GlowIntensity / 100.0f);
+			float Offset = Widths[i]  * (GlowIntensity / 100.0f);
+
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0.0f, 0.5f, 0.75f, AlphaCircle);
+			Graphics()->DrawCircle(Pos.x, Pos.y, Offset, 16);
+			Graphics()->QuadsEnd();
+		}
+	}
+	else if(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
@@ -350,6 +382,54 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, TicksHead, Type);
 }
 
+void CItems::RenderPortal(const CLaserData *pCurrent)
+{
+	vec2 Pos = pCurrent->m_To;
+	vec2 From = pCurrent->m_From;
+
+	vec2 Dir = normalize(Pos - From);
+	vec2 PortalDir = vec2(-Dir.y, Dir.x);
+
+	// float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
+	// float a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
+	// a = std::clamp(a, 0.0f, 1.0f);
+	// float Ia = 1 - a;
+
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+
+	constexpr int NumLayers = 13;
+
+	const float Alphas[NumLayers] = {
+		0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.08f, 0.10f,
+		0.15f, 0.25f, 0.45f, 0.65f, 0.85f, 1.0f
+		};
+	const float Widths[NumLayers] = {
+		24.0f, 22.0f, 20.0f, 18.0f, 16.0f, 14.0f, 12.0f,
+		10.0f, 8.0f, 6.0f, 4.0f, 3.0f, 2.0f
+		};
+
+	for(int i = 0; i < NumLayers; ++i)
+	{
+		float Alpha = Alphas[i];
+		float Offset = Widths[i];
+		vec2 Out = PortalDir * Offset;
+		vec2 OutShrink = Dir * Offset * i / NumLayers;
+
+		ColorRGBA Color = pCurrent->m_Type == PORTAL_TYPE_A ? ColorRGBA(1.0f, 0.8f, 0.0f, Alpha) : ColorRGBA(0.0f, 0.25f, 1.0f, Alpha);
+
+		Graphics()->SetColor(Color);
+		IGraphics::CFreeformItem Freeform(
+			From.x, From.y,
+			From.x + Out.x + OutShrink.x, From.y + Out.y + OutShrink.y,
+			Pos.x, Pos.y,
+			Pos.x + Out.x - OutShrink.x, Pos.y + Out.y - OutShrink.y);
+		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+	}
+
+	Graphics()->QuadsEnd();
+}
+
 void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
 {
 	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
@@ -515,6 +595,14 @@ void CItems::OnRender()
 				}
 			}
 		}
+		for(CEntity *pEnt = GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PORTAL); pEnt; pEnt = pEnt->NextEntity())
+		{
+			auto *const pPortal = dynamic_cast<CPortal *>(pEnt);
+			if(!pPortal)
+				continue;
+			CLaserData Data = pPortal->GetData();
+			RenderPortal(&Data);
+		}
 	}
 
 	for(const CSnapEntities &Ent : GameClient()->SnapEntities())
@@ -576,51 +664,60 @@ void CItems::OnRender()
 			}
 
 			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
-			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
-
-			bool IsEntBlink = false;
-			int EntStartTick = -1;
-			if(Data.m_Type == LASERTYPE_FREEZE)
+			
+			if(Data.m_Type == LASERTYPE_PORTAL)
 			{
-				IsEntBlink = BlinkingLight;
-				EntStartTick = DraggerStartTick;
-			}
-			else if(Data.m_Type == LASERTYPE_GUN)
-			{
-				IsEntBlink = BlinkingGun;
-				EntStartTick = GunStartTick;
-			}
-			else if(Data.m_Type == LASERTYPE_DRAGGER)
-			{
-				IsEntBlink = BlinkingDragger;
-				EntStartTick = DraggerStartTick;
-			}
-			else if(Data.m_Type == LASERTYPE_DOOR)
-			{
-				if(Data.m_Predict && (Inactive || IsSuper))
-				{
-					Data.m_From.x = Data.m_To.x;
-					Data.m_From.y = Data.m_To.y;
-				}
-				EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
+				Data.m_Type = Data.m_Subtype;
+				RenderPortal(&Data);
 			}
 			else
 			{
-				IsEntBlink = BlinkingDragger;
-				EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
-			}
+				bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
-			if(Data.m_Predict && Inactive && IsEntBlink)
-			{
-				continue;
-			}
+				bool IsEntBlink = false;
+				int EntStartTick = -1;
+				if(Data.m_Type == LASERTYPE_FREEZE)
+				{
+					IsEntBlink = BlinkingLight;
+					EntStartTick = DraggerStartTick;
+				}
+				else if(Data.m_Type == LASERTYPE_GUN)
+				{
+					IsEntBlink = BlinkingGun;
+					EntStartTick = GunStartTick;
+				}
+				else if(Data.m_Type == LASERTYPE_DRAGGER)
+				{
+					IsEntBlink = BlinkingDragger;
+					EntStartTick = DraggerStartTick;
+				}
+				else if(Data.m_Type == LASERTYPE_DOOR)
+				{
+					if(Data.m_Predict && (Inactive || IsSuper))
+					{
+						Data.m_From.x = Data.m_To.x;
+						Data.m_From.y = Data.m_To.y;
+					}
+					EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
+				}
+				else
+				{
+					IsEntBlink = BlinkingDragger;
+					EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
+				}
 
-			if(Data.m_StartTick <= 0 && EntStartTick != -1)
-			{
-				Data.m_StartTick = EntStartTick;
-			}
+				if(Data.m_Predict && Inactive && IsEntBlink)
+				{
+					continue;
+				}
 
-			RenderLaser(&Data);
+				if(Data.m_StartTick <= 0 && EntStartTick != -1)
+				{
+					Data.m_StartTick = EntStartTick;
+				}
+
+				RenderLaser(&Data);
+			}
 		}
 	}
 

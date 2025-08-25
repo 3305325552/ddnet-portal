@@ -272,6 +272,12 @@ void CGameContext::ConLaser(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, false);
 }
 
+void CGameContext::ConPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_GUN, false);
+}
+
 void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -318,6 +324,12 @@ void CGameContext::ConUnLaser(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, true);
+}
+
+void CGameContext::ConUnPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;	
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_GUN, true);
 }
 
 void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
@@ -374,6 +386,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 		pChr->GiveWeapon(WEAPON_SHOTGUN, Remove);
 		pChr->GiveWeapon(WEAPON_GRENADE, Remove);
 		pChr->GiveWeapon(WEAPON_LASER, Remove);
+		pChr->GiveWeapon(WEAPON_PORTAL_GUN, Remove);
 	}
 	else
 	{

@@ -235,6 +235,10 @@ public:
 	int m_SpawnTick;
 	int m_WeaponChangeTick;
 
+	int m_LastPortalType;
+	int m_LastPortalEnterType;
+	int m_LastPortalEnterTick;
+
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }

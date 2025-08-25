@@ -61,6 +61,7 @@ float CTuningParams::GetWeaponFireDelay(int Weapon) const
 	case WEAPON_GRENADE: return (float)m_GrenadeFireDelay / 1000.0f;
 	case WEAPON_LASER: return (float)m_LaserFireDelay / 1000.0f;
 	case WEAPON_NINJA: return (float)m_NinjaFireDelay / 1000.0f;
+	case WEAPON_PORTAL_GUN: return (float)m_PortalGunFireDelay / 1000.0f;
 	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
 	}
 }
@@ -671,6 +672,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_aWeapons[WEAPON_GRENADE].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
 	m_aWeapons[WEAPON_LASER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
 	m_aWeapons[WEAPON_NINJA].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
+	m_aWeapons[WEAPON_PORTAL_GUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_PORTALGUN) != 0;
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;

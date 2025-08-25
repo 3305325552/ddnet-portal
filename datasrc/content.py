@@ -149,6 +149,14 @@ class Weapon_Ninja(Struct):
 		self.movetime = Int(200)
 		self.velocity = Int(50)
 
+class Weapon_PortalGun(Struct):
+	def __init__(self):
+		Struct.__init__(self, "CDataWeaponspecPortalGun")
+		self.base = Pointer(WeaponSpec, WeaponSpec())
+		self.curvature = Float(1.25)
+		self.speed = Float(2200)
+		self.lifetime = Float(0.25)
+
 class Weapons(Struct):
 	def __init__(self):
 		Struct.__init__(self, "CDataWeaponspecs")
@@ -158,6 +166,7 @@ class Weapons(Struct):
 		self.grenade = Weapon_Grenade()
 		self.laser = Weapon_Laser()
 		self.ninja = Weapon_Ninja()
+		self.portalgun = Weapon_PortalGun()
 		self.id = Array(WeaponSpec())
 
 class DataContainer(Struct):
@@ -238,6 +247,7 @@ image_audio_source = Image("audio_source", "editor/audio_source.png")
 image_strongweak = Image("strongweak", "strong_weak.png")
 image_hud = Image("hud", "hud.png")
 image_extras = Image("extras", "extras.png")
+image_portal = Image("portal", "portal.png")
 
 container.images.Add(image_null)
 container.images.Add(image_game)
@@ -255,6 +265,7 @@ container.images.Add(image_strongweak)
 container.images.Add(image_hud)
 container.images.Add(image_extras)
 container.images.Add(Image("raceflag", "race_flag.png"))
+container.images.Add(image_portal)
 
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))
@@ -264,6 +275,7 @@ container.pickups.Add(Pickup("armor_laser"))
 container.pickups.Add(Pickup("armor_ninja"))
 container.pickups.Add(Pickup("weapon"))
 container.pickups.Add(Pickup("ninja", 90, 90))
+container.pickups.Add(Pickup("armor_portal_gun"))
 
 set_particles = SpriteSet("particles", image_particles, 8, 8)
 set_game = SpriteSet("game", image_game, 32, 16)
@@ -276,6 +288,7 @@ set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
 set_strongweak = SpriteSet("strongweak", image_strongweak, 3, 1)
 set_hud = SpriteSet("hud", image_hud, 16, 16)
 set_extras = SpriteSet("extras", image_extras, 16, 16)
+set_portal = SpriteSet("portal", image_portal, 32, 16)
 
 container.spritesets.Add(set_particles)
 container.spritesets.Add(set_game)
@@ -288,6 +301,7 @@ container.spritesets.Add(set_audio_source)
 container.spritesets.Add(set_strongweak)
 container.spritesets.Add(set_hud)
 container.spritesets.Add(set_extras)
+container.spritesets.Add(set_portal)
 
 container.sprites.Add(Sprite("part_slice", set_particles, 0,0,1,1))
 container.sprites.Add(Sprite("part_ball", set_particles, 1,0,1,1))
@@ -372,6 +386,12 @@ container.sprites.Add(Sprite("pickup_armor_laser", set_game, 19,2,2,2))
 
 container.sprites.Add(Sprite("flag_blue", set_game, 12,8,4,8))
 container.sprites.Add(Sprite("flag_red", set_game, 16,8,4,8))
+
+container.sprites.Add(Sprite("weapon_portal_gun_body", set_portal, 0,0,8,3))
+container.sprites.Add(Sprite("weapon_portal_gun_cursor", set_game, 0,12,2,2))
+container.sprites.Add(Sprite("weapon_portal_gun_proj", set_game, 0,0,0,0))
+container.sprites.Add(Sprite("pickup_portal_gun", set_portal, 0,8,2,2))
+container.sprites.Add(Sprite("pickup_armor_portal_gun", set_portal, 0,0,8,3))
 
 container.sprites.Add(Sprite("tee_body", set_tee, 0,0,3,3))
 container.sprites.Add(Sprite("tee_body_outline", set_tee, 3,0,3,3))
@@ -635,4 +655,13 @@ weapon.offsety.Set(0)
 weapon.muzzleoffsetx.Set(40)
 weapon.muzzleoffsety.Set(-4)
 container.weapons.ninja.base.Set(weapon)
+container.weapons.id.Add(weapon)
+
+weapon = WeaponSpec(container, "portal_gun")
+weapon.firedelay.Set(500)
+weapon.damage.Set(0)
+weapon.visual_size.Set(96)
+container.weapons.portalgun.base.Set(weapon)
+weapon.offsetx.Set(24)
+weapon.offsety.Set(-2)
 container.weapons.id.Add(weapon)

@@ -426,6 +426,7 @@ private:
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConPortalGun(IConsole::IResult *pResult, void *pUserData);
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConEndlessJump(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetJumps(IConsole::IResult *pResult, void *pUserData);
@@ -433,6 +434,7 @@ private:
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnLaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnPortalGun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);

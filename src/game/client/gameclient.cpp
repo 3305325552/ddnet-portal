@@ -385,6 +385,7 @@ void CGameClient::OnInit()
 	m_ParticlesSkinLoaded = false;
 	m_EmoticonsSkinLoaded = false;
 	m_HudSkinLoaded = false;
+	m_PortalsSkinLoaded = false;
 
 	// setup load amount, load textures
 	const char *pLoadingMessageAssets = Localize("Initializing assets");
@@ -400,6 +401,8 @@ void CGameClient::OnInit()
 			LoadHudSkin(g_Config.m_ClAssetHud);
 		else if(i == IMAGE_EXTRAS)
 			LoadExtrasSkin(g_Config.m_ClAssetExtras);
+		else if(i == IMAGE_PORTAL)
+			LoadPortalsSkin(g_Config.m_ClAssetPortals);
 		else if(g_pData->m_aImages[i].m_pFilename[0] == '\0') // handle special null image without filename
 			g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
 		else
@@ -4240,6 +4243,48 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_aSpriteParticles[3] = m_ExtrasSkin.m_SpriteHectagon;
 
 		m_ExtrasSkinLoaded = true;
+	}
+	ImgInfo.Free();
+}
+
+void CGameClient::LoadPortalsSkin(const char *pPath, bool AsDir)
+{
+	if(m_PortalsSkinLoaded)
+	{
+		Graphics()->UnloadTexture(&m_PortalsSkin.m_SpriteWeaponPortalGun);
+		Graphics()->UnloadTexture(&m_PortalsSkin.m_SpriteWeaponPortalGunCursor);
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_copy(aPath, g_pData->m_aImages[IMAGE_PORTAL].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/portal/%s/%s", pPath, g_pData->m_aImages[IMAGE_PORTAL].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/portal/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadExtrasSkin("default");
+		else
+			LoadExtrasSkin(pPath, true);
+	}
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_WEAPON_PORTAL_GUN_BODY].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_WEAPON_PORTAL_GUN_BODY].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRgba(aPath, ImgInfo))
+	{
+		m_PortalsSkin.m_SpriteWeaponPortalGun = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_PORTAL_GUN_BODY]);
+		m_PortalsSkin.m_SpriteWeaponPortalGunCursor = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_WEAPON_PORTAL_GUN_CURSOR]);
+
+		m_PortalsSkinLoaded = true;
 	}
 	ImgInfo.Free();
 }

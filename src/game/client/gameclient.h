@@ -684,6 +684,7 @@ public:
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
 	void LoadHudSkin(const char *pPath, bool AsDir = false);
 	void LoadExtrasSkin(const char *pPath, bool AsDir = false);
+	void LoadPortalsSkin(const char *pPath, bool AsDir = false);
 
 	struct SClientGameSkin
 	{
@@ -847,6 +848,15 @@ public:
 
 	SClientExtrasSkin m_ExtrasSkin;
 	bool m_ExtrasSkinLoaded = false;
+
+	struct SClientPortalsSkin
+	{
+		IGraphics::CTextureHandle m_SpriteWeaponPortalGun;
+		IGraphics::CTextureHandle m_SpriteWeaponPortalGunCursor;
+	};
+
+	SClientPortalsSkin m_PortalsSkin;
+	bool m_PortalsSkinLoaded = false;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 

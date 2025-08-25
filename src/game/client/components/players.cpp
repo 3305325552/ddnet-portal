@@ -532,7 +532,7 @@ void CPlayers::RenderPlayer(
 
 			// normal weapons
 			int CurrentWeapon = std::clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
-			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
+			Graphics()->TextureSet(CurrentWeapon == WEAPON_PORTAL_GUN ? GameClient()->m_PortalsSkin.m_SpriteWeaponPortalGun : GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
 			int QuadOffset = CurrentWeapon * 2 + (Direction.x < 0 ? 1 : 0);
 
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);

@@ -9,6 +9,7 @@
 
 #include "character.h"
 #include "projectile.h"
+#include "portal.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -63,6 +64,11 @@ vec2 CProjectile::GetPos(float Time)
 	case WEAPON_GUN:
 		Curvature = pTuning->m_GunCurvature;
 		Speed = pTuning->m_GunSpeed;
+		break;
+
+	case WEAPON_PORTAL_GUN:
+		Curvature = pTuning->m_PortalGunCurvature;
+		Speed = pTuning->m_PortalGunSpeed;
 		break;
 	}
 
@@ -128,7 +134,17 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN)
+		else if(Collide && m_Type == WEAPON_PORTAL_GUN)
+		{
+			vec2 Dir = vec2(m_Direction.x > 0 ? -1 : 1, m_Direction.y > 0 ? -1 : 1);
+			if(fabs(m_Direction.x) > fabs(m_Direction.y))
+				Dir.y = 0;
+			else
+				Dir.x = 0;
+			new CPortal(GameWorld(), m_Owner, ColPos, Dir, 96.f);
+			m_MarkedForDestroy = true;
+		}
+		else if(m_Type == WEAPON_GUN || m_Type == WEAPON_PORTAL_GUN)
 		{
 			m_MarkedForDestroy = true;
 		}
@@ -189,6 +205,8 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 		Lifetime = GetTuning(m_TuneZone)->m_GunLifetime * GameWorld()->GameTickSpeed();
 	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
 		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
+	else if(m_Type == WEAPON_PORTAL_GUN)
+		Lifetime = GetTuning(m_TuneZone)->m_PortalGunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;

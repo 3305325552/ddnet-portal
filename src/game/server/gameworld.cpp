@@ -25,6 +25,9 @@ CGameWorld::CGameWorld()
 	m_ResetRequested = false;
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		pFirstEntityType = nullptr;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int j = 0; j < 2; j++)
+			m_aaPortals[i][j] = nullptr;
 }
 
 CGameWorld::~CGameWorld()
@@ -33,6 +36,11 @@ CGameWorld::~CGameWorld()
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
 			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
+
+	// delete all portals
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int j = 0; j < 2; j++)
+			if(m_aaPortals[i][j]) delete m_aaPortals[i][j];
 }
 
 void CGameWorld::SetGameServer(CGameContext *pGameServer)

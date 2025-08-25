@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
 #include "character.h"
+#include "portal.h"
 
 #include <engine/shared/config.h>
 
@@ -101,6 +102,19 @@ vec2 CProjectile::GetPos(float Time)
 		{
 			Curvature = TuningList()[m_TuneZone].m_GunCurvature;
 			Speed = TuningList()[m_TuneZone].m_GunSpeed;
+		}
+		break;
+
+	case WEAPON_PORTAL_GUN:
+		if(!m_TuneZone)
+		{
+			Curvature = Tuning()->m_PortalGunCurvature;
+			Speed = Tuning()->m_PortalGunSpeed;
+		}
+		else
+		{
+			Curvature = TuningList()[m_TuneZone].m_PortalGunCurvature;
+			Speed = TuningList()[m_TuneZone].m_PortalGunSpeed;
 		}
 		break;
 	}
@@ -237,7 +251,17 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN)
+		else if(Collide && m_Type == WEAPON_PORTAL_GUN)
+		{
+			vec2 Dir = vec2(m_Direction.x > 0 ? -1 : 1, m_Direction.y > 0 ? -1 : 1);
+			if(fabs(m_Direction.x) > fabs(m_Direction.y))
+				Dir.y = 0;
+			else
+				Dir.x = 0;
+			new CPortal(GameWorld(), m_Owner, ColPos, Dir, 96.f);
+			m_MarkedForDestroy = true;
+		}
+		else if(m_Type == WEAPON_GUN || m_Type == WEAPON_PORTAL_GUN)
 		{
 			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
 			m_MarkedForDestroy = true;

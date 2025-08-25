@@ -3,6 +3,7 @@
 #include "character.h"
 #include "laser.h"
 #include "pickup.h"
+#include "portal.h"
 #include "projectile.h"
 
 #include <antibot/antibot_data.h>
@@ -69,6 +70,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
+
+	m_LastPortalType = -1;
+	m_LastPortalEnterType = -1;
+	m_LastPortalEnterTick = -1;
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
@@ -230,7 +235,7 @@ void CCharacter::HandleJetpack()
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
 	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
@@ -436,7 +441,7 @@ void CCharacter::FireWeapon()
 	vec2 Direction = normalize(MouseTarget);
 
 	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER  || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
@@ -611,6 +616,25 @@ void CCharacter::FireWeapon()
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	break;
+
+	case WEAPON_PORTAL_GUN:
+	{
+		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_PortalGunLifetime);
+
+		new CProjectile(
+			GameWorld(),
+			WEAPON_PORTAL_GUN, //Type
+			m_pPlayer->GetCid(), //Owner
+			ProjStartPos, //Pos
+			Direction, //Dir
+			Lifetime, //Span
+			false, //Freeze
+			false, //Explosive
+			SOUND_LASER_FIRE,
+			MouseTarget
+		);
 	}
 	break;
 	}
@@ -808,6 +832,35 @@ void CCharacter::Tick()
 
 void CCharacter::TickDeferred()
 {
+	for(int i = 0; i < 2; i++)
+	{
+		CPortal *pPortal = GameServer()->m_World.m_aaPortals[m_pPlayer->GetCid()][i];
+		vec2 TeleOutPos;
+		float VelRotation;
+
+		if(pPortal && pPortal->IntersectCharacter(m_Core.m_Pos, m_Core.m_Pos + m_Core.m_Vel, GetProximityRadius() / 2 * 3, TeleOutPos, VelRotation))
+		{
+			if(pPortal->GetType() == m_LastPortalEnterType && Server()->Tick() - m_LastPortalEnterTick > Server()->TickSpeed() / 4)
+			{
+				m_Core.m_Pos = TeleOutPos;
+				// rotate(m_Core.m_Vel, VelRotation);
+				m_LastPortalEnterType = pPortal->GetType();
+				m_LastPortalEnterTick = Server()->Tick();
+			}
+			else if(pPortal->GetType() != m_LastPortalEnterType && Server()->Tick() - m_LastPortalEnterTick > Server()->TickSpeed() / 4)
+			{
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "grounded: %d", IsGrounded());
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+				m_Core.m_Pos = TeleOutPos;
+				// rotate(m_Core.m_Vel, VelRotation);
+				m_LastPortalEnterType = pPortal->GetType();
+				m_LastPortalEnterTick = Server()->Tick();
+			}
+		}
+	}
+
 	// advance the dummy
 	{
 		CWorldCore TempWorld;
@@ -1281,6 +1334,8 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
+	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_PORTALGUN;
 	if(m_Core.m_LiveFrozen)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 

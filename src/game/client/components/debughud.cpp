@@ -75,6 +75,9 @@ void CDebugHud::RenderNetCorrections()
 	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->m_Snap.m_pLocalCharacter->m_Angle);
 	RenderRow("Angle:", aBuf);
 
+	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->m_Controls.m_aInputData[0].m_WantedWeapon);
+	RenderRow("Weapon:", aBuf);
+
 	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->NetobjNumCorrections());
 	RenderRow("Netobj corrections", aBuf);
 	RenderRow(" on:", GameClient()->NetobjCorrectedOn());

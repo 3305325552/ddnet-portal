@@ -3925,6 +3925,9 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
+
+	Console()->Register("portal", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPortalGun, this, "Gives a portal gun to you");
+	Console()->Register("unportal", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConUnPortalGun, this, "Removes the portal gun from you");
 }
 
 void CGameContext::OnInit(const void *pPersistentData)

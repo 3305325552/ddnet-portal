@@ -11,6 +11,7 @@
 
 class CEntity;
 class CCharacter;
+class CPortal;
 
 /*
 	Class: Game World
@@ -204,6 +205,8 @@ public:
 	CTuningParams *m_pTuningList;
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+
+	CPortal *m_aaPortals[MAX_CLIENTS][2];
 };
 
 #endif

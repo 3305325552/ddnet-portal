@@ -47,6 +47,10 @@ MACRO_TUNING_PARAM(LaserBounceNum, laser_bounce_num, 1000, "How many times the l
 MACRO_TUNING_PARAM(LaserBounceCost, laser_bounce_cost, 0, "Remove this much from reach when laser is bouncing")
 MACRO_TUNING_PARAM(LaserDamage, laser_damage, 5, "(UNUSED) Laser damage")
 
+MACRO_TUNING_PARAM(PortalGunCurvature, portal_gun_curvature, 0.25f, "Portal gun curvature")
+MACRO_TUNING_PARAM(PortalGunSpeed, portal_gun_speed, 2200.0f, "Portal gun speed")
+MACRO_TUNING_PARAM(PortalGunLifetime, portal_gun_lifetime, 2.0f, "Portal gun lifetime")
+
 MACRO_TUNING_PARAM(PlayerCollision, player_collision, 1, "Enable player collisions")
 MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1, "Enable player vs player hooking")
 
@@ -64,6 +68,7 @@ MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500, "Delay of firing g
 MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser laser")
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
 MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of hammering (when hitting another tee)")
+MACRO_TUNING_PARAM(PortalGunFireDelay, portal_gun_fire_delay, 500, "Delay of firing hammer when bouncing")
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
