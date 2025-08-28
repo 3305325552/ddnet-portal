@@ -813,6 +813,33 @@ void CCharacter::Tick()
 	// handle Weapons
 	HandleWeapons();
 
+	for(int i = 0; i < 2; i++)
+	{
+		CPortal *pPortal = GameServer()->m_World.m_aaPortals[m_pPlayer->GetCid()][i];
+		vec2 TeleOutPos;
+		float VelRotation;
+
+		if(pPortal && pPortal->IntersectCharacter(m_PrevPos, m_Pos + m_Core.m_Vel, GetProximityRadius(), TeleOutPos, VelRotation))
+		{
+			if(Server()->Tick() - m_LastPortalEnterTick > Server()->TickSpeed() / 4 && dot(pPortal->GetDirection(), m_Core.m_Vel) < -1.f)
+			{
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "SpeedIn(%.2f, %.2f)", m_Core.m_Vel.x, m_Core.m_Vel.y);
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+				m_Core.m_Pos = TeleOutPos;
+				m_Core.m_Vel = rotate(m_Core.m_Vel, VelRotation);
+
+				str_format(aBuf, sizeof(aBuf), "SpeedOut(%.2f, %.2f), Rotate:%.2f", m_Core.m_Vel.x, m_Core.m_Vel.y, VelRotation);
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+				m_LastPortalEnterType = pPortal->GetType();
+				m_LastPortalEnterTick = Server()->Tick();
+
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask());
+			}
+		}
+	}
+
 	DDRacePostCoreTick();
 
 	if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
@@ -832,35 +859,6 @@ void CCharacter::Tick()
 
 void CCharacter::TickDeferred()
 {
-	for(int i = 0; i < 2; i++)
-	{
-		CPortal *pPortal = GameServer()->m_World.m_aaPortals[m_pPlayer->GetCid()][i];
-		vec2 TeleOutPos;
-		float VelRotation;
-
-		if(pPortal && pPortal->IntersectCharacter(m_Core.m_Pos, m_Core.m_Pos + m_Core.m_Vel, GetProximityRadius() / 2 * 3, TeleOutPos, VelRotation))
-		{
-			if(pPortal->GetType() == m_LastPortalEnterType && Server()->Tick() - m_LastPortalEnterTick > Server()->TickSpeed() / 4)
-			{
-				m_Core.m_Pos = TeleOutPos;
-				// rotate(m_Core.m_Vel, VelRotation);
-				m_LastPortalEnterType = pPortal->GetType();
-				m_LastPortalEnterTick = Server()->Tick();
-			}
-			else if(pPortal->GetType() != m_LastPortalEnterType && Server()->Tick() - m_LastPortalEnterTick > Server()->TickSpeed() / 4)
-			{
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "grounded: %d", IsGrounded());
-				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
-
-				m_Core.m_Pos = TeleOutPos;
-				// rotate(m_Core.m_Vel, VelRotation);
-				m_LastPortalEnterType = pPortal->GetType();
-				m_LastPortalEnterTick = Server()->Tick();
-			}
-		}
-	}
-
 	// advance the dummy
 	{
 		CWorldCore TempWorld;

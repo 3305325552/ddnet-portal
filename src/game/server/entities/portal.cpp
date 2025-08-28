@@ -112,7 +112,7 @@ bool CPortal::IntersectCharacter(vec2 CharPos1, vec2 CharPos2, float Radius, vec
     if(Intersected)
     {
         TeleOutPos = m_pLinkedPortal->GetOutPos(t, Dist);
-        VelRotation = angle(m_pLinkedPortal->GetDirection()) - angle(m_Dir);
+        VelRotation = m_pLinkedPortal->GetVelocityRotation(m_Dir);
         return true;
     }
     else
@@ -122,7 +122,7 @@ bool CPortal::IntersectCharacter(vec2 CharPos1, vec2 CharPos2, float Radius, vec
 void CPortal::IntersectCharacter(vec2 CharPos, float &Distance, float &t)
 {
     vec2 AB = m_To - m_From;
-    vec2 AC = CharPos - m_From;
+    vec2 AC = CharPos - (m_From + m_Dir * 28.f);
 
     t = dot(AC, AB) / dot(AB, AB);
     t = std::clamp(t, 0.0f, 1.0f);
@@ -132,9 +132,16 @@ void CPortal::IntersectCharacter(vec2 CharPos, float &Distance, float &t)
 
 vec2 CPortal::GetOutPos(float Ratio, float Distance)
 {
-    vec2 OutPos = m_From + (m_To - m_From) * Ratio + m_Dir * Distance;
-    if(Collision()->IsSolid(round_to_int(OutPos.x), round_to_int(OutPos.y)))
-        return m_Pos + m_Dir * Distance;
+    vec2 OutPos = m_From + (m_To - m_From) * Ratio + m_Dir * 18.f;
+    if(Collision()->TestBox(OutPos, vec2(28.f, 28.f)))
+        return m_Pos + m_Dir * 18.f;
     else
         return OutPos;
+}
+
+float CPortal::GetVelocityRotation(vec2 Dir)
+{
+    if(m_Dir.y < -0.01f && Dir.y < -0.01f) return 180.f;
+    if(fabs(dot(m_Dir, Dir)) < 0.01f) return (angle(m_Dir) - angle(-Dir)) / pi * 180.f;
+    else return 0.f;
 }

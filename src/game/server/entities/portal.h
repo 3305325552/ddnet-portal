@@ -29,4 +29,5 @@ public:
     bool IntersectCharacter(vec2 CharPos1, vec2 CharPos2, float Radius, vec2 &TeleOutPos, float &VelRotattion);
     void IntersectCharacter(vec2 CharPos, float &Distance, float &t);
     vec2 GetOutPos(float Ratio, float Distance);
+    float GetVelocityRotation(vec2 Dir);
 };

@@ -44,7 +44,8 @@ PickupFlags = [
 	"XFLIP", "YFLIP", "ROTATE", "NO_PREDICT",
 ]
 
-LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
+PortalTypes = ["A", "B"]
+LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA", "PORTAL"]
 DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
 GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
 
@@ -85,6 +86,7 @@ Enums = [
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
 	Enum("ENTITYCLASS", EntityClasses),
+	Enum("PORTAL_TYPE", PortalTypes),
 	Enum("LASERTYPE", LaserTypes),
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
